@@ -69,7 +69,7 @@ louie --process-tasks
 louie --process-tasks --task-folder ./alternate-tasks
 ```
 
-When this flag is set, Louie loads tasks either from the folder declared in `louie.config.mjs` or from the folder passed to `--task-folder`. Any prompt passed alongside `--process-tasks` is ignored, and Louie prints a warning to remind you.
+When this flag is set, Louie loads tasks from the folder declared in `louie.config.mjs`, from `./tasks` when the config file is absent, or from the folder passed to `--task-folder`. Any prompt passed alongside `--process-tasks` is ignored, and Louie prints a warning to remind you.
 
 Task files are discovered with natural filename sorting. Files ending in `.log` or `.tmp` are ignored, empty files are skipped with a warning, and each successful run writes a `.tmp` file that is later finalized as `<task-name>.log`. If a `.log` already exists for a task, Louie skips the task to avoid rerunning completed work.
 
@@ -77,7 +77,7 @@ Task folders can be regular directories or symlinks. Louie resolves symlinks bef
 
 ## Configuration
 
-Create a `louie.config.mjs` file in the directory where you run the CLI. Export an object that points to your task folder. Louie accepts any of the following fields and resolves them relative to the config file:
+Louie first looks for a `louie.config.mjs` file in the directory where you run the CLI. Export an object that points to your task folder. Louie accepts any of the following fields and resolves them relative to the config file:
 
 ```js
 // louie.config.mjs
@@ -86,7 +86,7 @@ export default {
 };
 ```
 
-Place Markdown, text, or any plain-text files inside the tasks folder—each file becomes a single Codex prompt. Louie stops with an error when the folder is missing, cannot be read, or contains no usable task files. You can bypass configuration entirely by supplying `--process-tasks --task-folder <folder>` at runtime.
+Place Markdown, text, or any plain-text files inside the tasks folder—each file becomes a single Codex prompt. Louie stops with an error when the folder is missing, cannot be read, or contains no usable task files. If `louie.config.mjs` is not present, Louie falls back to `./tasks` in the current working directory. You can still override the location at runtime with `--process-tasks --task-folder <folder>`.
 
 ## Development
 

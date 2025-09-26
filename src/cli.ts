@@ -38,7 +38,7 @@ type LouieTask = {
  */
 type ProgramOptions = {
   processTasks?: boolean;
-  tasksFolder?: string;
+  taskFolder?: string;
 };
 
 /**
@@ -93,7 +93,7 @@ async function runCliAction(
 ): Promise<void> {
   const prompt = promptParts.join(" ").trim();
   const shouldProcessTasks = Boolean(options?.processTasks);
-  const tasksFolderOverride = options?.tasksFolder;
+  const tasksFolderOverride = options?.taskFolder;
 
   if (!shouldProcessTasks) {
     await runPromptMode(prompt, tasksFolderOverride);
@@ -174,12 +174,19 @@ async function runTasksMode(
 async function loadTasksForCli(
   tasksFolderOverride?: string,
 ): Promise<LouieTask[]> {
-  if (!tasksFolderOverride) {
-    return loadTasksFromConfig();
+  if (tasksFolderOverride) {
+    const absoluteFolder = resolve(process.cwd(), tasksFolderOverride);
+    return loadTasksFromDirectory(absoluteFolder);
   }
 
-  const absoluteFolder = resolve(process.cwd(), tasksFolderOverride);
-  return loadTasksFromDirectory(absoluteFolder);
+  const tasksFromConfig = await loadTasksFromConfig();
+
+  if (tasksFromConfig !== null) {
+    return tasksFromConfig;
+  }
+
+  const defaultFolder = resolve(process.cwd(), "tasks");
+  return loadTasksFromDirectory(defaultFolder);
 }
 
 /**
@@ -383,17 +390,15 @@ async function finalizeLogStream(
 
 /**
  * Loads the Louie configuration file and derives the tasks to execute.
- * @returns A promise with the tasks described in the configuration file.
+ * @returns A promise with tasks from the configuration, or null when missing.
  */
-async function loadTasksFromConfig(): Promise<LouieTask[]> {
+async function loadTasksFromConfig(): Promise<LouieTask[] | null> {
   const configPath = resolve(process.cwd(), "louie.config.mjs");
 
-  try {
-    await access(configPath);
-  } catch {
-    throw new Error(
-      "Could not find `louie.config.mjs` in the current working directory.",
-    );
+  const configExists = await fileExists(configPath);
+
+  if (!configExists) {
+    return null;
   }
 
   let rawConfig: unknown;
