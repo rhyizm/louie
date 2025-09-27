@@ -503,6 +503,10 @@ async function loadTasksFromDirectory(
     const filePath = join(resolvedFolder, file.name);
     const extension = parse(file.name).ext.toLowerCase();
 
+    if (file.name.startsWith(".")) {
+      continue;
+    }
+
     if (extension === ".log" || extension === ".tmp") {
       continue;
     }
