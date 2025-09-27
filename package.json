@@ -22,7 +22,8 @@
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "prepublishOnly": "pnpm lint && pnpm build"
+    "prepublishOnly": "pnpm lint && pnpm build",
+    "louie": "louie --process-tasks --task-folder \"./tasks\""
   },
   "keywords": [
     "cli",
